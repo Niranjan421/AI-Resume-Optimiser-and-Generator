@@ -2,6 +2,10 @@
 
 A powerful web application that uses Google's Gemini AI to optimize resumes for ATS (Applicant Tracking System) compatibility and provides detailed scoring analysis.
 
+
+## 🎥Explanatory Video for SatyaDrishti
+https://github.com/user-attachments/assets/8a77f640-bf86-45b3-a185-1080c5820629
+
 ## ✨ Features
 
 ### 🚀 Resume Optimization
@@ -174,6 +178,7 @@ If you encounter any issues:
 - Open source contributors for various dependencies
 
 ---
+
 
 
 
