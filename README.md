@@ -105,58 +105,6 @@ ai-resume-optimizer/
 └── README.md             # This file
 ```
 
-## 🔌 API Endpoints
-
-### POST `/api/optimize`
-Optimizes a resume for a specific job description.
-
-**Request:**
-- `resume`: Resume file (PDF/DOC/DOCX)
-- `jobDescription`: Text of the job description
-
-**Response:**
-```json
-{
-  "optimizedHtml": "HTML content of optimized resume",
-  "changes": {
-    "keywordsAdded": ["keyword1", "keyword2"],
-    "sectionsImproved": ["section1", "section2"],
-    "formattingAdjustments": ["adjustment1"],
-    "rationale": "Explanation of changes"
-  }
-}
-```
-
-### POST `/api/ats-score`
-Analyzes ATS compatibility and provides scoring.
-
-**Request:**
-- `resume`: Resume file (PDF/DOC/DOCX)
-- `jobDescription`: Text of the job description
-
-**Response:**
-```json
-{
-  "overallScore": 85,
-  "scoreBreakdown": {
-    "keywordMatch": 90,
-    "formatting": 85,
-    "contentRelevance": 80,
-    "structure": 90
-  },
-  "detailedFeedback": {
-    "strengths": ["Clear headers", "Good formatting"],
-    "weaknesses": ["Missing keywords"],
-    "keywordAnalysis": {
-      "matched": ["skill1", "skill2"],
-      "missing": ["skill3"],
-      "suggested": ["skill4"]
-    },
-    "recommendations": ["Add missing keywords"]
-  },
-  "atsCompatibility": "High compatibility"
-}
-```
 
 ## 🎨 Customization
 
@@ -217,15 +165,7 @@ If you encounter any issues:
 3. Ensure your resume file is in a supported format
 4. Check that the job description is not empty
 
-## 🔮 Future Enhancements
 
-- [ ] Resume template library
-- [ ] Multiple language support
-- [ ] Cover letter generation
-- [ ] Interview question preparation
-- [ ] Resume versioning and history
-- [ ] Integration with job boards
-- [ ] Mobile app version
 
 ## 🙏 Acknowledgments
 
@@ -235,7 +175,8 @@ If you encounter any issues:
 
 ---
 
-**Made with ❤️ and AI to help you land your dream job!**
+
+
 
 
 
