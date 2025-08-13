@@ -1,0 +1,54 @@
+# AI Resume Optimizer & ATS Score Checker - Requirements
+# Node.js Dependencies and Versions
+
+# Core Dependencies
+express==4.19.2
+@google/generative-ai==0.17.2
+multer==1.4.5-lts.1
+cors==2.8.5
+dotenv==16.4.5
+
+# Development Dependencies (Optional)
+# node==22.15.0 (or higher)
+# npm==10.0.0 (or higher)
+
+# Environment Variables Required
+# GEMINI_API_KEY=your_gemini_api_key_here
+# PORT=3000 (optional, defaults to 3000)
+# NODE_ENV=development (optional)
+
+# System Requirements
+# Operating System: Windows 10/11, macOS 10.15+, Ubuntu 18.04+
+# Node.js: v16.0.0 or higher (ES modules support required)
+# RAM: Minimum 512MB, Recommended 1GB+
+# Storage: Minimum 100MB free space
+# Internet: Required for Gemini API calls
+
+# Browser Support
+# Chrome: 80+
+# Firefox: 75+
+# Safari: 13+
+# Edge: 80+
+
+# File Format Support
+# Resume Files: PDF, DOC, DOCX (up to 8MB)
+# Text Input: Job descriptions (unlimited length)
+
+# API Requirements
+# Google Gemini API Key (free tier available)
+# API Endpoints: /api/optimize, /api/ats-score
+# Rate Limits: Subject to Gemini API limits
+# Response Time: 10-20 seconds for optimization, 10-15 seconds for scoring
+
+# Security Requirements
+# HTTPS recommended for production
+# API key protection
+# File upload validation
+# CORS configuration
+
+# Performance Requirements
+# Concurrent Users: 10+ (scalable)
+# File Processing: In-memory only
+# Response Time: <30 seconds
+# Uptime: 99%+ (excluding API dependencies)
+

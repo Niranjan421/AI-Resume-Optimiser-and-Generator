@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>AI Resume Optimizer & ATS Score Checker</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="container">
+        <h1>AI Resume Optimizer & ATS Score Checker</h1>
+        <p class="sub">Upload your resume and paste the job description. Get an ATS-optimized version and detailed compatibility scoring.</p>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <h2>Inputs</h2>
+        <form id="optimize-form">
+          <div class="form-row">
+            <label for="resume">Resume (PDF or DOC/DOCX)</label>
+            <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required />
+          </div>
+          <div class="form-row">
+            <label for="jobDescription">Job Description</label>
+            <textarea id="jobDescription" name="jobDescription" rows="10" placeholder="Paste the job description here..." required></textarea>
+          </div>
+          <div class="actions">
+            <button id="optimizeBtn" type="submit">Optimize Resume</button>
+            <button id="atsScoreBtn" type="button">Check ATS Score</button>
+          </div>
+        </form>
+        <p id="status" class="status" hidden></p>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <h2>Optimized Resume</h2>
+          <div id="resumeOutput" class="resume-output">
+            <p class="muted">Your optimized resume will appear here.</p>
+          </div>
+          <div class="actions inline">
+            <button id="copyHtmlBtn" disabled>Copy HTML</button>
+            <button id="downloadHtmlBtn" disabled>Download HTML</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Summary of Changes</h2>
+          <div id="changesOutput" class="changes-output">
+            <p class="muted">A summary of changes will appear here.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>ATS Score Analysis</h2>
+        <div id="atsScoreOutput" class="ats-score-output">
+          <p class="muted">Click "Check ATS Score" to analyze your resume's ATS compatibility.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <div class="container">
+        <p>&copy; 2025 Niranjan Jha. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script>
+      const form = document.getElementById('optimize-form');
+      const statusEl = document.getElementById('status');
+      const resumeOutput = document.getElementById('resumeOutput');
+      const changesOutput = document.getElementById('changesOutput');
+      const copyHtmlBtn = document.getElementById('copyHtmlBtn');
+      const downloadHtmlBtn = document.getElementById('downloadHtmlBtn');
+      const atsScoreBtn = document.getElementById('atsScoreBtn');
+      const atsScoreOutput = document.getElementById('atsScoreOutput');
+
+      function setStatus(text, isError = false) {
+        statusEl.hidden = false;
+        statusEl.textContent = text;
+        statusEl.classList.toggle('error', isError);
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fileInput = document.getElementById('resume');
+        const jdInput = document.getElementById('jobDescription');
+
+        if (!fileInput.files[0]) {
+          setStatus('Please select a resume file.', true);
+          return;
+        }
+
+        setStatus('Optimizing… This can take ~10–20s.');
+        copyHtmlBtn.disabled = true;
+        downloadHtmlBtn.disabled = true;
+        resumeOutput.innerHTML = '<p class="muted">Processing…</p>';
+        changesOutput.innerHTML = '<p class="muted">Processing…</p>';
+
+        try {
+          const fd = new FormData();
+          fd.append('resume', fileInput.files[0]);
+          fd.append('jobDescription', jdInput.value);
+
+          const resp = await fetch('/api/optimize', {
+            method: 'POST',
+            body: fd
+          });
+
+          const data = await resp.json();
+          if (!resp.ok) {
+            throw new Error(data.error || 'Request failed');
+          }
+
+          // Render optimized HTML
+          resumeOutput.innerHTML = data.optimizedHtml;
+
+          // Render changes summary
+          const c = data.changes || {};
+          const keywords = (c.keywordsAdded || []).map(k => `<li>${k}</li>`).join('');
+          const sections = (c.sectionsImproved || []).map(s => `<li>${s}</li>`).join('');
+          const formatting = (c.formattingAdjustments || []).map(f => `<li>${f}</li>`).join('');
+          const rationale = c.rationale ? `<p><strong>Rationale:</strong> ${c.rationale}</p>` : '';
+          changesOutput.innerHTML = `
+            <div class="changes">
+              <h3>Keywords Added/Adjusted</h3>
+              <ul>${keywords || '<li>No explicit keywords listed.</li>'}</ul>
+              <h3>Sections Improved</h3>
+              <ul>${sections || '<li>—</li>'}</ul>
+              <h3>Formatting Adjustments for ATS</h3>
+              <ul>${formatting || '<li>—</li>'}</ul>
+              ${rationale}
+            </div>
+          `;
+
+          copyHtmlBtn.disabled = false;
+          downloadHtmlBtn.disabled = false;
+          setStatus('Done.');
+        } catch (err) {
+          console.error(err);
+          setStatus(err.message || 'Something went wrong.', true);
+          resumeOutput.innerHTML = '<p class="muted">—</p>';
+          changesOutput.innerHTML = '<p class="muted">—</p>';
+        }
+      });
+
+      copyHtmlBtn.addEventListener('click', async () => {
+        const html = resumeOutput.innerHTML;
+        await navigator.clipboard.writeText(html);
+        setStatus('HTML copied to clipboard.');
+      });
+
+      downloadHtmlBtn.addEventListener('click', () => {
+        const blob = new Blob([resumeOutput.innerHTML], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'optimized_resume.html';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      // ATS Score Checker
+      atsScoreBtn.addEventListener('click', async () => {
+        const fileInput = document.getElementById('resume');
+        const jdInput = document.getElementById('jobDescription');
+
+        if (!fileInput.files[0]) {
+          setStatus('Please select a resume file first.', true);
+          return;
+        }
+
+        if (!jdInput.value.trim()) {
+          setStatus('Please enter a job description first.', true);
+          return;
+        }
+
+        setStatus('Analyzing ATS compatibility... This may take ~10-15s.');
+        atsScoreOutput.innerHTML = '<p class="muted">Analyzing...</p>';
+
+        try {
+          const fd = new FormData();
+          fd.append('resume', fileInput.files[0]);
+          fd.append('jobDescription', jdInput.value);
+
+          const resp = await fetch('/api/ats-score', {
+            method: 'POST',
+            body: fd
+          });
+
+          const data = await resp.json();
+          if (!resp.ok) {
+            throw new Error(data.error || 'Request failed');
+          }
+
+          // Render ATS score results
+          const score = data.overallScore;
+          const breakdown = data.scoreBreakdown;
+          const feedback = data.detailedFeedback;
+          
+          let scoreClass = 'score-excellent';
+          if (score < 70) scoreClass = 'score-poor';
+          else if (score < 80) scoreClass = 'score-fair';
+          else if (score < 90) scoreClass = 'score-good';
+
+          atsScoreOutput.innerHTML = `
+            <div class="ats-score">
+              <div class="score-header">
+                <h3>Overall ATS Score: <span class="${scoreClass}">${score}/100</span></h3>
+                <p class="compatibility">${data.atsCompatibility}</p>
+              </div>
+              
+              <div class="score-breakdown">
+                <h4>Score Breakdown</h4>
+                <div class="score-grid">
+                  <div class="score-item">
+                    <span class="label">Keyword Match</span>
+                    <span class="value">${breakdown.keywordMatch}/100</span>
+                  </div>
+                  <div class="score-item">
+                    <span class="label">Formatting</span>
+                    <span class="value">${breakdown.formatting}/100</span>
+                  </div>
+                  <div class="score-item">
+                    <span class="label">Content Relevance</span>
+                    <span class="value">${breakdown.contentRelevance}/100</span>
+                  </div>
+                  <div class="score-item">
+                    <span class="label">Structure</span>
+                    <span class="value">${breakdown.structure}/100</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="feedback-section">
+                <h4>Detailed Feedback</h4>
+                
+                <div class="feedback-group">
+                  <h5>Strengths</h5>
+                  <ul>${feedback.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
+                </div>
+
+                <div class="feedback-group">
+                  <h5>Areas for Improvement</h5>
+                  <ul>${feedback.weaknesses.map(w => `<li>${w}</li>`).join('')}</ul>
+                </div>
+
+                <div class="feedback-group">
+                  <h5>Keyword Analysis</h5>
+                  <div class="keyword-analysis">
+                    <div class="keyword-group">
+                      <strong>Matched Keywords:</strong>
+                      <span class="keywords matched">${feedback.keywordAnalysis.matched.join(', ')}</span>
+                    </div>
+                    <div class="keyword-group">
+                      <strong>Missing Keywords:</strong>
+                      <span class="keywords missing">${feedback.keywordAnalysis.missing.join(', ')}</span>
+                    </div>
+                    <div class="keyword-group">
+                      <strong>Suggested Keywords:</strong>
+                      <span class="keywords suggested">${feedback.keywordAnalysis.suggested.join(', ')}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="feedback-group">
+                  <h5>Recommendations</h5>
+                  <ul>${feedback.recommendations.map(r => `<li>${r}</li>`).join('')}</ul>
+                </div>
+              </div>
+            </div>
+          `;
+
+          setStatus('ATS analysis complete!');
+        } catch (err) {
+          console.error(err);
+          setStatus(err.message || 'ATS analysis failed.', true);
+          atsScoreOutput.innerHTML = '<p class="muted">Analysis failed. Please try again.</p>';
+        }
+      });
+    </script>
+  </body>
+  </html>
+
+
