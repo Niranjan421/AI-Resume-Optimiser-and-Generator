@@ -97,7 +97,7 @@ A powerful web application that uses Google's Gemini AI to optimize resumes for 
 ai-resume-optimizer/
 ├── server.js              # Express server with API endpoints
 ├── package.json           # Dependencies and scripts
-├── .env                   # Environment variables (create this)
+├── env.example                   # Environment variables (create this)
 ├── public/
 │   ├── index.html        # Main application interface
 │   ├── styles.css        # Application styling
@@ -236,5 +236,6 @@ If you encounter any issues:
 ---
 
 **Made with ❤️ and AI to help you land your dream job!**
+
 
 
